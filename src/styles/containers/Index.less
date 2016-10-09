@@ -1,8 +1,42 @@
 @import '~styles/main';
 
+.button {
+  background-color: @color__button;
+  border: none;
+  width: 100%;
+  text-align: center;
+  color: #fff;
+  padding: @padding;
+
+  &:hover {
+    cursor: pointer;
+    background-color: darken(@color__button, 2%);
+  }
+}
+
+.fields {
+  margin: @padding 0;
+}
+
+.field {
+  display: block;
+  border: 1px solid @color__button;
+  width: 100%;
+  padding: (@padding / 2);
+
+  & + & {
+    margin-top: @padding;
+  }
+}
+
+.field--empty {
+  composes: field;
+  border-color: @color__error;
+}
+
 // Animations
 .enter {
-  animation: fadeInDown @duration--enter;
+  animation: fadeIn @duration--enter;
   opacity: 0.01;
 }
 
@@ -12,7 +46,7 @@
 }
 
 .leave {
-  animation: fadeOutUp @duration--enter;
+  animation: fadeOut @duration--enter;
   opacity: 1;
 }
 

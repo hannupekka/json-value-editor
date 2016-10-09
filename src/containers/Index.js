@@ -3,6 +3,7 @@ import styles from 'styles/containers/Index';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import Dropzone from 'react-dropzone';
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import CSSModules from 'react-css-modules';
 import map from 'lodash/map';
 import flatten from 'flat';
@@ -39,7 +40,7 @@ class Index extends Component {
     }
 
     return (
-      <form>
+      <form styleName="fields">
         {map(flatten(json.toJS()), (value, key) => {
           return (
             <input
@@ -47,11 +48,24 @@ class Index extends Component {
               id={key}
               key={key}
               value={value}
+              styleName={value.length > 0 ? 'field' : 'field--empty'}
               onChange={(this:any).onChange}
             />
           );
         })}
       </form>
+    );
+  }
+
+  renderDownloadButton = (): ?ElementType => {
+    const { json } = this.props;
+
+    if (json.count() === 0) {
+      return null;
+    }
+
+    return (
+      <button onClick={(this:any).onDownload} styleName="button">Download</button>
     );
   }
 
@@ -71,20 +85,45 @@ class Index extends Component {
     const file = files[0];
     const reader = new FileReader();
     reader.addEventListener('loadend', () => {
-      const json = JSON.parse(reader.result);
-      onImport(json);
+      try {
+        const json = JSON.parse(reader.result);
+        onImport(json);
+      } catch (error) {
+        onError();
+      }
     });
 
     return reader.readAsText(file);
   }
 
+  onDownload = (): void => {
+  }
+
   render(): ElementType {
     return (
       <div>
-        <Dropzone onDrop={(this:any).onDrop} multiple={false} accept="application/json">
-          <div>Try dropping some files here, or click to select files to upload.</div>
+        <Dropzone
+          onDrop={(this:any).onDrop}
+          styleName="button"
+          multiple={false}
+          accept="application/json"
+        >
+          <div>Try dropping some files here, or click to select file to upload.</div>
         </Dropzone>
-        {this.renderFields()}
+        {this.renderError()}
+        <ReactCSSTransitionGroup
+          transitionEnterTimeout={150}
+          transitionLeaveTimeout={150}
+          transitionName={{
+            enter: styles.enter,
+            enterActive: styles['enter--active'],
+            leave: styles.leave,
+            leaveActive: styles['leave--active'],
+          }}
+        >
+          {this.renderFields()}
+        </ReactCSSTransitionGroup>
+        {this.renderDownloadButton()}
       </div>
     );
   }

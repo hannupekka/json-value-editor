@@ -28,9 +28,15 @@ export const initialState = fromJS({
 export default function reducer(state: StateType = initialState, action: ActionType): StateType {
   switch (action.type) {
     case IMPORT_JSON_SUCCESS:
-      return state.set('json', fromJS(action.payload));
+      return state.merge({
+        json: action.payload,
+        error: false
+      });
     case IMPORT_JSON_FAILURE:
-      return state.set('error', true);
+      return state.merge({
+        json: {},
+        error: true
+      });
     case UPDATE_VALUE:
       return state.setIn(['json'].concat(action.payload.id), action.payload.value);
     default:
