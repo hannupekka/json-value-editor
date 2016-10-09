@@ -7,11 +7,13 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import CSSModules from 'react-css-modules';
 import map from 'lodash/map';
 import flatten from 'flat';
+import download from 'downloadjs';
 import Error from 'components/Error';
 import * as dataActions from 'redux/modules/data';
 
 type Props = {
   json: Object,
+  filename: string,
   error: bool,
   onImport: (json: Object) => ActionType,
   onError: () => ActionType,
@@ -87,7 +89,7 @@ class Index extends Component {
     reader.addEventListener('loadend', () => {
       try {
         const json = JSON.parse(reader.result);
-        onImport(json);
+        onImport(json, file.name);
       } catch (error) {
         onError();
       }
@@ -97,6 +99,8 @@ class Index extends Component {
   }
 
   onDownload = (): void => {
+    const { json, filename } = this.props;
+    download(JSON.stringify(json.toJS(), null, 2), filename, 'application/json');
   }
 
   render(): ElementType {
@@ -108,7 +112,7 @@ class Index extends Component {
           multiple={false}
           accept="application/json"
         >
-          <div>Try dropping some files here, or click to select file to upload.</div>
+          <div>Try dropping a file here, or click to select file to upload.</div>
         </Dropzone>
         {this.renderError()}
         <ReactCSSTransitionGroup
@@ -131,11 +135,13 @@ class Index extends Component {
 
 const select = (state: StateType): StateType => ({
   json: state.data.get('json'),
+  filename: state.data.get('filename'),
   error: state.data.get('error')
 });
 
 const mapActions = (dispatch: Function): Object => ({
-  onImport: (json: Object): ActionType => dispatch(dataActions.importJSON(json)),
+  onImport: (json: Object, filename: string): ActionType =>
+    dispatch(dataActions.importJSON(json, filename)),
   onError: (): ActionType => dispatch(dataActions.importJSONFailure()),
   onUpdateValue: (id: string, value: string): ActionType =>
     dispatch(dataActions.updateValue(id, value))
